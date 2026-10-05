@@ -51,6 +51,7 @@ $ultimaCompra    = dashboardUltimaCompra($compras);
             <a href="cadastrarCaixa.php"><span class="icone"></span>Caixa</a>
             <a href="cadastarCliente.php"><span class="icone"></span>Cliente</a>
             <a href="cadastarEnvio.php"><span class="icone"></span>Envio</a>
+             <a href="ListarLog.php" ><span class="icone"></span>Log</a>
             <?php if ($perfil == 'ADMINISTRADOR') { ?>
 
                 <a href="cadastarUtilizadores.php">
