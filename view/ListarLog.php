@@ -7,6 +7,12 @@ if (!$sessao->esta_logado()) {
     exit();
 }
 
+$perfil = $_SESSION['perfil'];
+if (isset($_GET['remover'])) {
+    remocao($_GET['remover']);
+}
+
+
 $logs = listaDeLogs();
 ?>
 
@@ -17,14 +23,14 @@ $logs = listaDeLogs();
     <meta charset='utf-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <title>LISTAR LOGS</title>
-    <link rel='stylesheet' href='../css/Log.css'>
+    <link rel='stylesheet' href='Log.css'>
 </head>
 
 <body>
 
     <div class="navbar">
         <div class="marca">
-            <img src="../img/logo.png" alt="Logo" class="marca-logo">
+            <img src="logo.png" alt="Logo" class="marca-logo">
             <div class="titulo-marca">SISTEMA DE<br />GESTAO DE COMPRAS</div>
         </div>
 
@@ -36,7 +42,11 @@ $logs = listaDeLogs();
             <a href="cadastrarCaixa.php"><span class="icone"></span>Caixa</a>
             <a href="cadastarCliente.php"><span class="icone"></span>Cliente</a>
             <a href="cadastarEnvio.php"><span class="icone"></span>Envio</a>
-            <a href="cadastarUtilizadores.php"><span class="icone"></span>Utilizadores</a>
+            <?php if ($perfil == 'ADMINISTRADOR') { ?>
+                <a href="cadastarUtilizadores.php">
+                    <span class="icone"></span>Utilizadores
+                </a>
+            <?php } ?>
             <a href="ListarLog.php" class="on"><span class="icone"></span>Log</a>
         </nav>
 

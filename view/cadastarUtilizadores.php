@@ -53,13 +53,12 @@ if (isset($_POST['cadastrar'])) {
             <a href="cadastarEnvio.php"><span class="icone"></span>Envio</a>
 
             <?php if ($perfil == 'ADMINISTRADOR') { ?>
-
-                <a class="on" href="cadastarUtilizadores.php">
-                    <span class="icone"></span>Utilizadores
-                </a>
-
+                <a class="on" href="cadastarUtilizadores.php"><span class="icone"></span>Utilizadores</a>
             <?php } ?>
 
+            <?php if ($perfil == 'AUDITOR') { ?>
+                <a href="ListarLog.php"><span class="icone"></span>Envio</a>
+            <?php } ?>
         </nav>
         <a href="logout.php" class="sair">Log out</a>
     </div>
@@ -85,14 +84,33 @@ if (isset($_POST['cadastrar'])) {
                         <div class="campoTipo">
                             <label class="label"><strong>Nome do utilizador</strong></label>
                         </div>
-                        <input type="text" name="nome" class="input">
+                        <input type="text" name="nome" class="input" required>
                     </div>
 
                     <div class="campo">
                         <div class="campoTipo">
                             <label class="label"><strong>Apelido do utilizador</strong></label>
                         </div>
-                        <input type="text" name="apelido" class="input">
+                        <input type="text" name="apelido" class="input" required>
+                    </div>
+
+                    <div class="campo">
+                        <div class="campoTipo">
+                            <label class="label"><strong>Numero BI do utilizador</strong></label>
+                        </div>
+                        <input type="text" name="apelido" class="input" required>
+                    </div>
+
+                    <div class="campo">
+                        <label class="label"> <strong>Estadado Civil do utilizador</strong></label>
+                        <select name="perfil" class="input" required>
+                            <option value="">Selecione um Estado civil</option>
+                            <option value="Solteiro">Solteiro(a)</option>
+                            <option value="Casado">Casado(a)</option>
+                            <option value="Divorciado">Divorciado(a)</option>
+                            <option value="Viuvo    ">Viuvo(a)</option>
+                        </select>
+
                     </div>
 
                     <div class="campo">
@@ -100,7 +118,7 @@ if (isset($_POST['cadastrar'])) {
                             <div class="campoTipo">
                                 <label class="label"><strong>Username</strong></label>
                             </div>
-                            <input type="text" name="username" class="input">
+                            <input type="text" name="username" class="input" required>
                         </div>
 
                         <div class="campo">
@@ -108,7 +126,7 @@ if (isset($_POST['cadastrar'])) {
                                 <div class="campoTipo">
                                     <label class="label"><strong>Email</strong></label>
                                 </div>
-                                <input type="email" name="email" class="input">
+                                <input type="email" name="email" class="input" required>
                             </div>
 
                             <div class="campo">
@@ -116,7 +134,7 @@ if (isset($_POST['cadastrar'])) {
                                     <div class="campoTipo">
                                         <label class="label"><strong>Contacto</strong></label>
                                     </div>
-                                    <input type="number" name="contacto" class="input">
+                                    <input type="number" name="contacto" class="input" required>
                                 </div>
 
                                 <div class="campo">
@@ -129,7 +147,7 @@ if (isset($_POST['cadastrar'])) {
 
                                     <div class="campo">
                                         <label class="label"> <strong>Perfil do utilizador</strong></label>
-                                        <select name="perfil" class="input">
+                                        <select name="perfil" class="input" required>
                                             <option value="">Selecione um perfil</option>
                                             <option value="ADMINISTRADOR">Administrador</option>
                                             <option value="AUDITOR">Auditor</option>

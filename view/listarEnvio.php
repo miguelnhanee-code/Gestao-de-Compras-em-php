@@ -61,15 +61,14 @@ $produtos = listarProdutosEnviados();
             <a href="cadastarCliente.php"><span class="icone"></span>Cliente</a>
             <a class="on" href="cadastarEnvio.php"><span class="icone"></span>Envio</a>
             <?php if ($perfil == 'ADMINISTRADOR') { ?>
-
-                <a href="cadastarUtilizadores.php">
-                    <span class="icone"></span>Utilizadores
-                </a>
-
+                <a href="cadastarUtilizadores.php"><span class="icone"></span>Utilizadores</a>
+            <?php } ?>
+            <?php if ($perfil == 'AUDITOR') { ?>
+                <a href="ListarLog.php"><span class="icone"></span>Envio</a>
             <?php } ?>
         </nav>
 
-     <a href="logout.php" class="sair">Log out</a>
+        <a href="logout.php" class="sair">Log out</a>
     </div>
 
     <div class="mae">
@@ -187,9 +186,9 @@ $produtos = listarProdutosEnviados();
 
                                         <input type="date" name="dataEnvio" class="input" value="<?= $envio->getDataEnvio() ?>">
                                     </div>
-                                    <input type="hidden" name="id"value="<?= $envio->getIdEnvia() ?>">
+                                    <input type="hidden" name="id" value="<?= $envio->getIdEnvia() ?>">
                                     <div class="acao">
-                                        <button name="guardar" type="submit" class="botao"> Guardar  </button>
+                                        <button name="guardar" type="submit" class="botao"> Guardar </button>
                                     </div>
                                 </form>
                             </div>
@@ -243,9 +242,9 @@ $produtos = listarProdutosEnviados();
                                         </label>
                                         <input type="date" name="dataEnvio" class="input" value="<?= $envio->getDataEnvio() ?>">
                                     </div>
-                                    <input type="hidden" name="id"value="<?= $envio->getIdEnvia() ?>">
+                                    <input type="hidden" name="id" value="<?= $envio->getIdEnvia() ?>">
                                     <div class="acao">
-                                        <button name="remover" type="submit"class="botao"> remover  </button>
+                                        <button name="remover" type="submit" class="botao"> remover </button>
                                     </div>
                                 </form>
                             </div>

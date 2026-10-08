@@ -38,7 +38,11 @@ $perfil = $_SESSION['perfil'];
                     <span class="icone"></span>Utilizadores
                 </a>
             <?php } ?>
-            
+
+            <?php if ($perfil == 'AUDITOR') { ?>
+                <a href="ListarLog.php"><span class="icone"></span>Envio</a>
+            <?php } ?>
+
         </nav>
 
         <a href="logout.php" class="sair">Log out</a>

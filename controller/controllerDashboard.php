@@ -4,6 +4,8 @@ include_once(__DIR__ . "/../model/Produto.php");
 include_once(__DIR__ . "/../model/Compra.php");
 include_once(__DIR__ . "/../model/caixaModel.php");
 include_once(__DIR__ . "/../model/clienteModel.php");
+include_once(__DIR__ . "/../controller/clienteController.php");
+include_once(__DIR__ . "/../controller/clienteController.php");
 
 $conexao = mysqli_connect("localhost", "root", "", "gestaocompra");
 
@@ -15,13 +17,7 @@ function dashboardProdutos()
     $result = mysqli_query($conexao, $sql);
     if ($result) {
         while ($rs = mysqli_fetch_assoc($result)) {
-            $produto = new Produto(
-                $rs['idProduto'],
-                $rs['produto'],
-                $rs['precoUnitario'],
-                $rs['dataConfecao'],
-                $rs['dataValidade']
-            );
+            $produto = new Produto($rs['idProduto'], $rs['produto'], $rs['precoUnitario'], $rs['dataConfecao'], $rs['dataValidade']);
             array_push($produtos, $produto);
         }
     }
@@ -39,12 +35,7 @@ function dashboardCompras()
     if ($result) {
         while ($rs = mysqli_fetch_assoc($result)) {
             $compra = new Compra($rs['idCompra'], $rs['quantidade'], $rs['dataDaCompra'], $rs['idProduto'], $rs['idCliente']);
-            array_push($compras, array(
-                'compra' => $compra,
-                'nomeProduto' => $rs['nomeProduto'],
-                'precoProduto' => $rs['precoProduto'],
-                'nomeCliente' => $rs['nomeCliente']
-            ));
+            array_push($compras, array('compra' => $compra, 'nomeProduto' => $rs['nomeProduto'], 'precoProduto' => $rs['precoProduto'], 'nomeCliente' => $rs['nomeCliente']));
         }
     }
     return $compras;

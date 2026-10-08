@@ -17,6 +17,7 @@ function listarCaixa()
         while ($rs = mysqli_fetch_assoc($result)) {
             $caixa = new Caixa($rs['idCaixa'], $rs['nomeCaixa']);
             array_push($caixas, $caixa);
+            
         }
     }
     return $caixas;

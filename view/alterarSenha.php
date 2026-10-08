@@ -48,7 +48,13 @@ if (isset($_POST['entrar'])) {
                 <label for="usuario">Email</label>
                 <input type="email" name="email" placeholder="Email de utilizador" required>
 
+                <label for="senha">Atiga Palavra-passe</label>
+                <input type="text" name="senha" placeholder="Senha antiga" requir>
+
                 <label for="senha">NOVA Palavra-passe</label>
+                <input type="password" name="senha" placeholder="••••••••" requir>
+
+                <label for="senha">Confirma nova Palavra-passe</label>
                 <input type="password" name="senha" placeholder="••••••••" required>
 
                 <button type="submit" name="entrar">Entrar</button>

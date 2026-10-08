@@ -67,9 +67,13 @@ if (isset($_POST['guardar']) && !empty($_POST['id']) && !empty($_POST['nome_clie
                 </a>
 
             <?php } ?>
+
+            <?php if ($perfil == 'AUDITOR') { ?>
+                <a href="ListarLog.php"><span class="icone"></span>Envio</a>
+            <?php } ?>
         </nav>
 
-       <a href="logout.php" class="sair">Log out</a>
+        <a href="logout.php" class="sair">Log out</a>
     </div>
 
     <div class="mae">

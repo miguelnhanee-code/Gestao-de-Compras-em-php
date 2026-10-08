@@ -62,11 +62,11 @@ if (
             <a href="cadastarCliente.php"><span class="icone"></span>Cliente</a>
             <a href="cadastarEnvio.php"><span class="icone"></span>Envio</a>
             <?php if ($perfil == 'ADMINISTRADOR') { ?>
+                <a href="cadastarUtilizadores.php"><span class="icone"></span>Utilizadores </a>
+            <?php } ?>
 
-                <a href="cadastarUtilizadores.php">
-                    <span class="icone"></span>Utilizadores
-                </a>
-
+            <?php if ($perfil == 'AUDITOR') { ?>
+                <a href="ListarLog.php"><span class="icone"></span>Envio</a>
             <?php } ?>
         </nav>
 
@@ -198,7 +198,7 @@ if (
                         <!-- fim da modal -->
                     <?php } ?>
 
-                     <?php foreach ($produtos as $produto) { ?>
+                    <?php foreach ($produtos as $produto) { ?>
                         <!-- MODAL remover-->
                         <div class="modalFundo" id="remover-<?= $produto->getIdproduto() ?>">
                             <a href="#" class="modalOverlay" aria-label="Fechar"></a>
@@ -242,7 +242,7 @@ if (
                                     </div>
 
                                     <div class="acao">
-                                        <button type="submit" name="remover" class="botao" >Remover</button>
+                                        <button type="submit" name="remover" class="botao">Remover</button>
                                     </div>
                                 </form>
                             </div>
