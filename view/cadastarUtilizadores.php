@@ -5,18 +5,23 @@ include_once __DIR__ . '/../controller/controllerLogin.php';
 
 if (!$sessao->esta_logado()) {
     header("Location: Login.php");
-    exit();
+    exit;
 }
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+
 $perfil = $_SESSION['perfil'];
 
 $utilizadores = listar();
+$perfis = listarPerfis();
 
 if (isset($_POST['cadastrar'])) {
 
     if (
         !empty($_POST['nome']) && !empty($_POST['apelido']) && !empty($_POST['email']) && !empty($_POST['contacto']) && !empty($_POST['username']) && !empty($_POST['senha']) && !empty($_POST['perfil'])
+        && !empty($_POST['bi']) && !empty($_POST['estadoCivil']) && !empty($_POST['sexo'])
     ) {
-        $utilizador = new utilizadores(null, $_POST['nome'], $_POST['apelido'], $_POST['email'], $_POST['contacto'], $_POST['username'], $_POST['senha'],  $_POST['perfil']);
+        $utilizador = new utilizadores(null, $_POST['nome'], $_POST['apelido'], $_POST['email'], $_POST['contacto'], $_POST['username'], $_POST['senha'], $_POST['perfil'], $_POST['bi'], $_POST['estadoCivil'], $_POST['sexo']);
         criacao($utilizador);
     } else {
         echo "Preencha todos os campos";
@@ -57,9 +62,14 @@ if (isset($_POST['cadastrar'])) {
             <?php } ?>
 
             <?php if ($perfil == 'AUDITOR') { ?>
-                <a href="ListarLog.php"><span class="icone"></span>Envio</a>
+                <a href="ListarLog.php"><span class="icone"></span>Log</a>
             <?php } ?>
         </nav>
+        <div style="margin: 15px;">
+            <p>Olá, <?= isset($_SESSION['nome']) ? $_SESSION['nome'] : ''; ?>!</p>
+            <p>Perfil: <?= isset($_SESSION['perfil']) ? $_SESSION['perfil'] : ''; ?></p>
+        </div>
+        <a href="alterarSenha.php" class="sair">Alterar Senha</a>
         <a href="logout.php" class="sair">Log out</a>
     </div>
 
@@ -98,19 +108,27 @@ if (isset($_POST['cadastrar'])) {
                         <div class="campoTipo">
                             <label class="label"><strong>Numero BI do utilizador</strong></label>
                         </div>
-                        <input type="text" name="apelido" class="input" required>
+                        <input type="text" name="bi" class="input" required>
                     </div>
 
                     <div class="campo">
-                        <label class="label"> <strong>Estadado Civil do utilizador</strong></label>
-                        <select name="perfil" class="input" required>
+                        <label class="label"> <strong>Estado Civil do utilizador</strong></label>
+                        <select name="estadoCivil" class="input" required>
                             <option value="">Selecione um Estado civil</option>
                             <option value="Solteiro">Solteiro(a)</option>
                             <option value="Casado">Casado(a)</option>
                             <option value="Divorciado">Divorciado(a)</option>
-                            <option value="Viuvo    ">Viuvo(a)</option>
+                            <option value="Viuvo">Viuvo(a)</option>
                         </select>
+                    </div>
 
+                    <div class="campo">
+                        <label class="label"> <strong>Genero do utilizador</strong></label>
+                        <select name="sexo" class="input" required>
+                            <option value="">Selecione um Genero</option>
+                            <option value="Masculino">Masculino</option>
+                            <option value="Feminino">Feminino</option>
+                        </select>
                     </div>
 
                     <div class="campo">
@@ -148,11 +166,11 @@ if (isset($_POST['cadastrar'])) {
                                     <div class="campo">
                                         <label class="label"> <strong>Perfil do utilizador</strong></label>
                                         <select name="perfil" class="input" required>
-                                            <option value="">Selecione um perfil</option>
-                                            <option value="ADMINISTRADOR">Administrador</option>
-                                            <option value="AUDITOR">Auditor</option>
-                                            <option value="OPERADOR">Operador</option>
-                                            <option value="SUPER OPERADOR">Super Operador</option>
+                                            <?php foreach ($perfis as $perfil) { ?>
+                                                <option value="<?php echo $perfil['nomePerfil']; ?>">
+                                                    <?php echo $perfil['nomePerfil']; ?>
+                                                </option>
+                                            <?php } ?>
                                         </select>
 
                                     </div>

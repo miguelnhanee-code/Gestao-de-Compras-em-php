@@ -1,11 +1,22 @@
 <?php
-// session_start();
-// include_once(__DIR__ . "/../controller/controllerLogin.php");
 include_once(__DIR__ . "/../controller/utilizadorController.php");
 
+$erro = "";
+
 if (isset($_POST['entrar'])) {
-    if (!empty($_POST['email']) && !empty($_POST['senha'])) {
-        alterarSenha($_POST['email'], $_POST['senha']);
+    $email = $_POST['email'] ?? '';
+    $senhaAntiga = $_POST['senha_antiga'] ?? '';
+    $novaSenha = $_POST['nova_senha'] ?? '';
+    $confirmaSenha = $_POST['confirma_senha'] ?? '';
+
+    if (!verificarEmail($email)) {
+        $erro = "Email incorreto.";
+    } elseif (!verificarSenhaAntiga($email, $senhaAntiga)) {
+        $erro = "Senha antiga incorreta.";
+    } elseif ($novaSenha !== $confirmaSenha) {
+        $erro = "As senhas não são iguais.";
+    } else {
+        alterarSenha($email, $novaSenha);
         header("Location: Login.php");
         exit;
     }
@@ -45,17 +56,21 @@ if (isset($_POST['entrar'])) {
                 <h2>Alterar senha</h2>
                 <p class="subtitulo">Introduza uma nova senha para aceder ao sistema.</p>
 
+                <?php if ($erro !== "") {
+                    echo "<p>" . htmlspecialchars($erro) . "</p>";
+                } ?>
+
                 <label for="usuario">Email</label>
                 <input type="email" name="email" placeholder="Email de utilizador" required>
 
                 <label for="senha">Atiga Palavra-passe</label>
-                <input type="text" name="senha" placeholder="Senha antiga" requir>
+                <input type="text" name="senha_antiga" placeholder="Senha antiga" required>
 
                 <label for="senha">NOVA Palavra-passe</label>
-                <input type="password" name="senha" placeholder="••••••••" requir>
+                <input type="password" name="nova_senha" placeholder="••••••••" required>
 
                 <label for="senha">Confirma nova Palavra-passe</label>
-                <input type="password" name="senha" placeholder="••••••••" required>
+                <input type="password" name="confirma_senha" placeholder="••••••••" required>
 
                 <button type="submit" name="entrar">Entrar</button>
                 <!-- <a href="#">Esqueceu a palavra-passe?</a> -->

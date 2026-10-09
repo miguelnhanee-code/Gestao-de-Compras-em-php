@@ -6,8 +6,11 @@ include_once __DIR__ . '/../controller/controllerDashboard.php';
 include_once __DIR__ . '/../controller/controllerLogin.php';
 if (!$sessao->esta_logado()) {
     header("Location: Login.php");
-    exit();
+    exit;
 }
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+
 $perfil = $_SESSION['perfil'];
 
 $produtos = dashboardProdutos();
@@ -60,11 +63,13 @@ $ultimaCompra    = dashboardUltimaCompra($compras);
             <?php } ?>
 
             <?php if ($perfil == 'AUDITOR') { ?>
-                <a href="ListarLog.php"><span class="icone"></span>Envio</a>
+                <a href="ListarLog.php"><span class="icone"></span>Log</a>
             <?php } ?>
         </nav>
 
+        <a href="alterarSenha.php" class="sair">Alterar Senha</a>
         <a href="logout.php" class="sair">Log out</a>
+
     </div>
 
     <div class="mae">

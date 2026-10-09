@@ -4,16 +4,24 @@ include_once(__DIR__ . "/../controller/controllerLogin.php");
 
 if (!$sessao->esta_logado()) {
     header("Location: Login.php");
-    exit();
+    exit;
 }
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
 
 $perfil = $_SESSION['perfil'];
-if (isset($_GET['remover'])) {
-    remocao($_GET['remover']);
+if (isset($_POST['remover'])) {
+    remocao($_POST['remover']);
 }
 
-
 $logs = listaDeLogs();
+$pesquisa = $_POST['pesquisaCampo'];
+if (isset($_POST['pesquisarBt'])) {
+    if (!empty($pesquisa)) {
+       $logs =  pesquisarLog($pesquisa);
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -49,7 +57,11 @@ $logs = listaDeLogs();
             <?php } ?>
             <a href="ListarLog.php" class="on"><span class="icone"></span>Log</a>
         </nav>
-
+        <div style="margin: 15px;">
+            <p>Olá, <?= isset($_SESSION['nome']) ? $_SESSION['nome'] : ''; ?>!</p>
+            <p>Perfil: <?= isset($_SESSION['perfil']) ? $_SESSION['perfil'] : ''; ?></p>
+        </div>
+        <a href="alterarSenha.php" class="sair">Alterar Senha</a>
         <a href="logout.php" class="sair"><span class="icone"></span>Log out</a>
     </div>
 
@@ -68,14 +80,16 @@ $logs = listaDeLogs();
                     <h1 class="titulo"><strong>Lista de Logs</strong></h1>
                 </div>
 
-                <div class="linha">
-                    <div class="campo campoBusca">
-                        <input type="text" name="pesquisa" class="input" placeholder="Pesquisar log">
+                <form method="post">
+                    <div class="linha">
+                        <div class="campo campoBusca">
+                            <input type="text" name="pesquisaCampo" class="input" placeholder="Pesquisar ">
+                        </div>
+                        <div class="campo">
+                            <button type="submit" name="pesquisarBt" class="botao">Pesquisar</button>
+                        </div>
                     </div>
-                    <div class="campo">
-                        <button type="button" class="botao">Listar</button>
-                    </div>
-                </div>
+                </form>
 
                 <div class="tabela">
                     <table>
@@ -89,14 +103,12 @@ $logs = listaDeLogs();
                                 <th>Data da Acao</th>
                             </tr>
                         </thead>
-
                         <?php if (count($logs) == 0) { ?>
                             <tr>
                                 <td>SEM NENHUM LOG REGISTADO</td>
                             </tr>
                         <?php } else { ?>
                             <?php foreach ($logs as $log) { ?>
-
                                 <tr>
                                     <td><?= $log->getIdLog() ?></td>
                                     <td><?= $log->getEmail() ?></td>
@@ -105,7 +117,6 @@ $logs = listaDeLogs();
                                     <td><?= $log->getAccao() ?></td>
                                     <td><?= $log->getDataAccao() ?></td>
                                 </tr>
-
                         <?php }
                         } ?>
 

@@ -54,3 +54,19 @@ function listaDeLogs()
     }
     return $logs;
 }
+
+function pesquisarLog($pesquisa)
+{
+    global $conexao;
+    $logs = array();
+    $pesquisa = mysqli_real_escape_string($conexao, $pesquisa);
+    $sql = "select *, u.email from log left join utilizadores u on u.idUtilizador = idUsuario where log.nome like '%{$pesquisa}%' or log.perfil like '%{$pesquisa}%' or log.accao like '%{$pesquisa}%' or u.email like '%{$pesquisa}%' or log.dataAccao like '%{$pesquisa}%' ORDER BY dataAccao DESC";
+    $result = mysqli_query($conexao, $sql);
+    if ($result) {
+        while ($rs = mysqli_fetch_assoc($result)) {
+            $log = new Log($rs['idLog'], $rs['idUsuario'], $rs['nome'], $rs['perfil'], $rs['accao'], $rs['dataAccao'], $rs['email']);
+            array_push($logs, $log);
+        }
+    }
+    return $logs;
+}

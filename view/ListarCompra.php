@@ -6,8 +6,10 @@ include_once __DIR__ . '/../controller/clienteController.php';
 include_once __DIR__ . '/../controller/controllerLogin.php';
 if (!$sessao->esta_logado()) {
     header("Location: Login.php");
-    exit();
+    exit;
 }
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
 $perfil = $_SESSION['perfil'];
 
 $compras = listarCompra();
@@ -21,7 +23,8 @@ if (isset($_POST['remover'])) {
 }
 
 if (
-    isset($_POST['guardar']) && !empty($_POST['id']) && !empty($_POST['idproduto']) && !empty($_POST['idcliente'])
+    isset($_POST['guardar']) && !empty($_POST['id']) &&
+    !empty($_POST['idproduto']) && !empty($_POST['idcliente'])
     && !empty($_POST['quantidade']) && !empty($_POST['dataCompra'])
 ) {
     $compra = encontraCompra($_POST['id']);
@@ -33,8 +36,11 @@ if (
         $compra->setDataCompra($_POST['dataCompra']);
         actualizarCompra($compra);
     }
-    header('Location: ListarCompra.php');
+    header('Location: ListarCompra.php#');
 }
+
+$pesquisa = $_GET['pesquisa'] ?? '';
+$compras = $pesquisa !== '' ? pesquisarCompra($pesquisa) : listarCompra();
 
 ?>
 
@@ -72,11 +78,15 @@ if (
 
             <?php } ?>
             <?php if ($perfil == 'AUDITOR') { ?>
-                <a href="ListarLog.php"><span class="icone"></span>Envio</a>
+                <a href="ListarLog.php"><span class="icone"></span>Log</a>
             <?php } ?>
         </nav>
-
-      <a href="logout.php" class="sair">Log out</a>
+        <div style="margin: 15px;">
+            <p>Olá, <?= isset($_SESSION['nome']) ? $_SESSION['nome'] : ''; ?>!</p>
+            <p>Perfil: <?= isset($_SESSION['perfil']) ? $_SESSION['perfil'] : ''; ?></p>
+        </div>
+        <a href="alterarSenha.php" class="sair">Alterar Senha</a>
+        <a href="logout.php" class="sair">Log out</a>
     </div>
 
     <div class="mae">
@@ -95,15 +105,16 @@ if (
                     <h1 class="titulo"><strong>Lista de Compras</strong></h1>
                 </div>
 
-                <div class="linha">
-                    <div class="campo campoBusca">
-                        <input type="text" name="pesquisa" class="input" placeholder="Pesquisar compra">
+                <form method="get">
+                    <div class="linha">
+                        <div class="campo campoBusca">
+                            <input type="text" name="pesquisa" class="input" placeholder="Pesquisar " value="<?= $pesquisa ?>">
+                        </div>
+                        <div class="campo">
+                            <button type="submit" class="botao">Pesquisar</button>
+                        </div>
                     </div>
-                    <div class="campo">
-                        <button type="button" class="botao">Listar</button>
-                    </div>
-                </div>
-
+                </form>
                 <div class="tabela">
                     <table>
                         <thead>
@@ -142,10 +153,10 @@ if (
 
                                             <form method="post">
 
-                                                <?php if ($perfil == 'ADMINISTRADOR' || $perfil == 'AUDITOR' || $perfil == 'SUEPER OPERADOR') { ?>
+                                                <?php if ($perfil == 'ADMINISTRADOR' || $perfil == 'AUDITOR' || $perfil == 'SUPER OPERADOR') { ?>
                                                     <input type="hidden" name="id" value="<?= $compra->getIdcompra() ?>">
                                                     <a href="#editar-<?= $compra->getIdcompra() ?>" class="botaoAtualizar"> Editar </a>
-                                                <a href="#remover-<?= $compra->getIdcompra() ?>" class="botaoRemover"> Remover </a>
+                                                    <a href="#remover-<?= $compra->getIdcompra() ?>" class="botaoRemover"> Remover </a>
                                                 <?php } ?>
 
                                             </form>
@@ -158,10 +169,10 @@ if (
                     </table>
 
                     <?php foreach ($compras as $linha) {
-                    $compra = $linha['compra']; ?>
+                        $compra = $linha['compra']; ?>
                         <!-- MODAL-->
                         <div class="modalFundo" id="editar-<?= $compra->getIdcompra() ?>">
-                            <a href="#" class="modalOverlay" aria-label="Fechar"></a>
+                            <!-- <a href="#" class="modalOverlay" aria-label="Fechar"></a> -->
                             <div class="modalCaixa">
                                 <div class="modalTopo">
                                     <h2 class="titulo">Editar Compra</h2>
@@ -224,11 +235,11 @@ if (
                         <!-- fim da modal -->
                     <?php } ?>
 
-                      <?php foreach ($compras as $linha) {
-                    $compra = $linha['compra']; ?>
+                    <?php foreach ($compras as $linha) {
+                        $compra = $linha['compra']; ?>
                         <!-- MODAL-->
                         <div class="modalFundo" id="remover-<?= $compra->getIdcompra() ?>">
-                            <a href="#" class="modalOverlay" aria-label="Fechar"></a>
+                            <!-- <a href="#" class="modalOverlay" aria-label="Fechar"></a> -->
                             <div class="modalCaixa">
                                 <div class="modalTopo">
                                     <h2 class="titulo">Remover Compra</h2>

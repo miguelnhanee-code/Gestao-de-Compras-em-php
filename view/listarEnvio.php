@@ -5,8 +5,10 @@ include_once(__DIR__ . "/../controller/envioController.php");
 include_once __DIR__ . '/../controller/controllerLogin.php';
 if (!$sessao->esta_logado()) {
     header("Location: Login.php");
-    exit();
+    exit;
 }
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
 $perfil = $_SESSION['perfil'];
 // include_once(__DIR__ . "/../controller/controllerFornecedor.php");
 // include_once(__DIR__ . "/../controller/controllerProduto.php");
@@ -25,12 +27,15 @@ if (
         $envio->setDataEnvio($_POST['dataEnvio']);
         edicaoEnvio($envio);
     }
-    header('Location: listarEnvio.php');
+    header('Location: listarEnvio.php#');
     exit;
 }
 $envios = listarEnvio();
 $fornecedores = listarFornecedoresEnviados();
 $produtos = listarProdutosEnviados();
+
+$pesquisa = $_GET['pesquisa'] ?? '';
+$envios = $pesquisa !== '' ? pesquisarEnvio($pesquisa) : listarEnvio();
 ?>
 
 
@@ -64,10 +69,14 @@ $produtos = listarProdutosEnviados();
                 <a href="cadastarUtilizadores.php"><span class="icone"></span>Utilizadores</a>
             <?php } ?>
             <?php if ($perfil == 'AUDITOR') { ?>
-                <a href="ListarLog.php"><span class="icone"></span>Envio</a>
+                <a href="ListarLog.php"><span class="icone"></span>Log</a>
             <?php } ?>
         </nav>
-
+         <div style="margin: 15px;">
+            <p>Olá, <?= isset($_SESSION['nome']) ? $_SESSION['nome'] : ''; ?>!</p>
+            <p>Perfil: <?= isset($_SESSION['perfil']) ? $_SESSION['perfil'] : ''; ?></p>
+        </div>
+        <a href="alterarSenha.php" class="sair">Alterar Senha</a>
         <a href="logout.php" class="sair">Log out</a>
     </div>
 
@@ -87,14 +96,16 @@ $produtos = listarProdutosEnviados();
                     <h1 class="titulo"><strong>Lista de envios</strong></h1>
                 </div>
 
-                <div class="linha">
-                    <div class="campo campoBusca">
-                        <input type="text" name="pesquisa" class="input" placeholder="Pesquisar caixa">
+                <form method="get">
+                    <div class="linha">
+                        <div class="campo campoBusca">
+                            <input type="text" name="pesquisa" class="input" placeholder="Pesquisar " value="<?= $pesquisa ?>">
+                        </div>
+                        <div class="campo">
+                            <button type="submit" class="botao">Pesquisar</button>
+                        </div>
                     </div>
-                    <div class="campo">
-                        <button type="button" class="botao">Listar</button>
-                    </div>
-                </div>
+                </form>
 
                 <div class="tabela">
                     <table>
@@ -122,7 +133,7 @@ $produtos = listarProdutosEnviados();
                                     <td><?= $envio->getDataEnvio() ?></td>
 
                                     <td class="acoes">
-                                        <?php if ($perfil == 'ADMINISTRADOR' || $perfil == 'AUDITOR' || $perfil == 'SUEPER OPERADOR') { ?>
+                                        <?php if ($perfil == 'ADMINISTRADOR' || $perfil == 'AUDITOR' || $perfil == 'SUPER OPERADOR') { ?>
 
                                             <a href="#editar-<?= $envio->getIdEnvia() ?>" class="botaoAtualizar"> Editar </a>
                                             <a href="#remover-<?= $envio->getIdEnvia() ?>" class="botaoRemover"> Remover </a>
@@ -144,7 +155,7 @@ $produtos = listarProdutosEnviados();
                         <!-- modal editar -->
 
                         <div class="modalFundo" id="editar-<?= $envio->getIdEnvia() ?>">
-                            <a href="#" class="modalOverlay" aria-label="Fechar"></a>
+                            <!-- <a href="#" class="modalOverlay" aria-label="Fechar"></a> -->
                             <div class="modalCaixa">
                                 <div class="modalTopo">
                                     <h2 class="titulo">Editar Envio</h2>
@@ -201,7 +212,7 @@ $produtos = listarProdutosEnviados();
                         <!-- modal remover -->
 
                         <div class="modalFundo" id="remover-<?= $envio->getIdEnvia() ?>">
-                            <a href="#" class="modalOverlay" aria-label="Fechar"></a>
+                            <!-- <a href="#" class="modalOverlay" aria-label="Fechar"></a> -->
                             <div class="modalCaixa">
                                 <div class="modalTopo">
                                     <h2 class="titulo">Remover Envio</h2>

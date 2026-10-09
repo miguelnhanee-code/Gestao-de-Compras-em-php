@@ -5,44 +5,54 @@ include_once __DIR__ . '/../controller/utilizadorController.php';
 include_once __DIR__ . '/../controller/controllerLogin.php';
 if (!$sessao->esta_logado()) {
     header("Location: Login.php");
-    exit();
+    exit;
 }
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
 $perfil = $_SESSION['perfil'];
 $utilizadores = listar();
 
 
-
-if (isset($_GET['id'])) {
-    resetarSenha((int) $_GET['id']);
-}
-
 if (isset($_POST['remover'])) {
-    global $conexao;
-    remocao($_POST['id']);
+    remocao((int) $_POST['id']);
     header('Location: listarUtilizadores.php');
     exit;
 }
 
-if (isset($_POST['guardar']) && !empty($_POST['id']) && !empty($_POST['nome_cliente']) && !empty($_POST['apelido_cliente']) && !empty($_POST['idCaixa'])) {
-    $cliente = encontra($_POST['id']);
-    if ($cliente) {
-        $cliente->setNomecliente($_POST['nome_cliente']);
-        $cliente->setApelidoCliente($_POST['apelido_cliente']);
-        $cliente->setIdCaixa($_POST['idCaixa']);
-        edicao($cliente);
-    }
-    header('Location: listarClientes.php');
+if (isset($_POST['guardar']) && !empty($_POST['id']) && !empty($_POST['nome']) && !empty($_POST['apelido']) && !empty($_POST['email']) && !empty($_POST['contacto']) && !empty($_POST['username']) && !empty($_POST['perfil'])) {
+    $atual = encontraUtilizador((int) $_POST['id']);
+    $utilizador = new utilizadores(
+        $atual->getIdUtilizador(),
+        $_POST['nome'],
+        $_POST['apelido'],
+        $_POST['email'],
+        $_POST['contacto'],
+        $_POST['username'],
+        $atual->getSenha(),
+        $_POST['perfil'],
+        $atual->getBi(),
+        $atual->getEstadoCivil(),
+        $atual->getSexo()
+    );
+    edicao($utilizador);
+    header('Location: listarUtilizadores.php');
     exit;
 }
 
 
-if (isset($_POST['resetarSenha'])) {
+if (isset($_POST['resetar'])) {
     if (!empty($_POST['id'])) {
-        resetarSenha($_POST['id']);
+        resetarSenha((int) $_POST['id']);
     } else {
-        echo "Utilizador não encontrado";
+        echo "Utilizador nao encontrado";
     }
 }
+
+$perfis = listarPerfis();
+$nomesPerfis = array_column($perfis, 'nomePerfil', 'idPerfil');
+
+$pesquisa = $_GET['pesquisa'] ?? '';
+$utilizadores = $pesquisa !== '' ? pesquisarUtilizador($pesquisa) : listar();
 
 
 ?>
@@ -83,10 +93,14 @@ if (isset($_POST['resetarSenha'])) {
 
             <?php } ?>
             <?php if ($perfil == 'AUDITOR') { ?>
-                <a href="ListarLog.php"><span class="icone"></span>Envio</a>
+                <a href="ListarLog.php"><span class="icone"></span>Log</a>
             <?php } ?>
         </nav>
-
+        <div style="margin: 15px;">
+            <p>Olá, <?= isset($_SESSION['nome']) ? $_SESSION['nome'] : ''; ?>!</p>
+            <p>Perfil: <?= isset($_SESSION['perfil']) ? $_SESSION['perfil'] : ''; ?></p>
+        </div>
+        <a href="alterarSenha.php" class="sair">Alterar Senha</a>
         <a href="logout.php" class="sair">Log out</a>
     </div>
 
@@ -106,14 +120,16 @@ if (isset($_POST['resetarSenha'])) {
                     <h1 class="titulo"><strong>Lista de Utilizadores</strong></h1>
                 </div>
 
-                <div class="linha">
-                    <div class="campo campoBusca">
-                        <input type="text" name="pesquisa" class="input" placeholder="Pesquisar compra">
+                <form method="get">
+                    <div class="linha">
+                        <div class="campo campoBusca">
+                            <input type="text" name="pesquisa" class="input" placeholder="Pesquisar utilizador" value="<?= $pesquisa ?>">
+                        </div>
+                        <div class="campo">
+                            <button type="submit" class="botao">Listar</button>
+                        </div>
                     </div>
-                    <div class="campo">
-                        <button type="button" class="botao">Listar</button>
-                    </div>
-                </div>
+                </form>
 
                 <div class="tabela">
                     <table>
@@ -126,13 +142,16 @@ if (isset($_POST['resetarSenha'])) {
                                 <th>Email</th>
                                 <th>Username</th>
                                 <th>Perfil</th>
+                                <th>Genero</th>
+                                <th>Estado Civil</th>
+                                <th>Numero de BI</th>
                                 <th>Acores</th>
                             </tr>
                         </thead>
 
                         <?php if (count($utilizadores) == 0) { ?>
                             <tr>
-                                <td>SEM NENHUM CAIXA REGISTADO</td>
+                                <td>SEM NENHUM UTILIZADOR REGISTADO</td>
                             </tr>
                         <?php } else { ?>
                             <?php foreach ($utilizadores as $utilizador) { ?>
@@ -144,19 +163,18 @@ if (isset($_POST['resetarSenha'])) {
                                     <td><?= $utilizador->getContacto() ?></td>
                                     <td><?= $utilizador->getEmail() ?></td>
                                     <td><?= $utilizador->getUsername() ?></td>
-                                    <td><?= $utilizador->getPerfil() ?></td>
-
-
+                                    <td><?= $nomesPerfis[$utilizador->getPerfil()] ?? $utilizador->getPerfil() ?></td>
+                                    <td><?= $utilizador->getSexo() ?></td>
+                                    <td><?= $utilizador->getEstadoCivil() ?></td>
+                                    <td><?= $utilizador->getBi() ?></td>
                                     <td>
                                         <div class="acoes">
 
                                             <a href="#editar-<?= $utilizador->getIdUtilizador() ?>" class="botaoAtualizar"> Editar </a>
+                                            <a href="#removerModal-<?= $utilizador->getIdUtilizador() ?>" class="botaoRemover"> Remover </a>
                                             <form method="post">
                                                 <input type="hidden" name="id" value="<?= $utilizador->getIdUtilizador() ?>">
-                                                <button type="submit" class="botaoRemover" name="remover"> Remover </button>
                                                 <button type="submit" class="botaoRemover" name="resetar"> Resetar Senha </button>
-
-
                                             </form>
                                         </div>
                                     </td>
@@ -167,9 +185,8 @@ if (isset($_POST['resetarSenha'])) {
                     </table>
 
                     <?php for ($i = 0; $i < count($utilizadores); $i++) {   ?>
-                        <!-- MODAL-->
+                        <!-- MODAL EDITAR -->
                         <div class="modalFundo" id="editar-<?= $utilizadores[$i]->getIdUtilizador() ?>">
-                            <a href="#" class="modalOverlay" aria-label="Fechar"></a>
                             <div class="modalCaixa">
                                 <div class="modalTopo">
                                     <h2 class="titulo">Editar utilizador</h2>
@@ -177,45 +194,51 @@ if (isset($_POST['resetarSenha'])) {
                                 </div>
 
                                 <form method="post" action="">
-                                    <input type="hidden" name="id" value="<?= $utilizadores[$i]->getNome() ?>">
+                                    <input type="hidden" name="id" value="<?= $utilizadores[$i]->getIdUtilizador() ?>">
 
                                     <div class="campo">
                                         <div class="campoTipo">
-                                            <label class="label"><strong>Nome do email</strong></label>
+                                            <label class="label"><strong>Nome</strong></label>
                                         </div>
-                                        <input type="text" name="nome_cliente" class="input" value=" <?= $utilizadores[$i]->getEmail() ?>">
+                                        <input type="text" name="nome" class="input" value="<?= $utilizadores[$i]->getNome() ?>" required readonly>
                                     </div>
 
                                     <div class="campo">
                                         <div class="campoTipo">
-                                            <label class="label"><strong>Apelido do Utilizador</strong></label>
+                                            <label class="label"><strong>Apelido</strong></label>
                                         </div>
-                                        <input type="text" name="nome_cliente" class="input" value=" <?= $utilizadores[$i]->getApelido() ?>">
+                                        <input type="text" name="apelido" class="input" value="<?= $utilizadores[$i]->getApelido() ?>" required readonly>
+                                    </div>
+
+                                    <div class="campo">
+                                        <div class="campoTipo">
+                                            <label class="label"><strong>Email</strong></label>
+                                        </div>
+                                        <input type="email" name="email" class="input" value="<?= $utilizadores[$i]->getEmail() ?>" required readonly>
                                     </div>
 
                                     <div class="campo">
                                         <div class="campoTipo">
                                             <label class="label"><strong>Contacto</strong></label>
                                         </div>
-                                        <input type="text" name="apelido_cliente" class="input" value="<?= $utilizadores[$i]->getContacto() ?>">
+                                        <input type="text" name="contacto" class="input" value="<?= $utilizadores[$i]->getContacto() ?>" required>
                                     </div>
 
                                     <div class="campo">
                                         <div class="campoTipo">
                                             <label class="label"><strong>Username</strong></label>
                                         </div>
-                                        <input type="text" name="apelido_cliente" class="input" value="<?= $utilizadores[$i]->getUsername() ?>">
+                                        <input type="text" name="username" class="input" value="<?= $utilizadores[$i]->getUsername() ?>" required readonly>
                                     </div>
 
                                     <div class="campo">
-                                        <label class="label"> <strong>Nome do caixa</strong></label>
-
-                                        <select name="perfil" class="input">
-                                            <option value="">Selecione um perfil</option>
-                                            <option value="ADMINISTRADOR">Administrador</option>
-                                            <option value="AUDITOR">Auditor</option>
-                                            <option value="OPERADOR">Operador</option>
-                                            <option value="SUPER OPERADOR">Super Operador</option>
+                                        <label class="label"><strong>Perfil</strong></label>
+                                        <select name="perfil" class="input" required>
+                                            <?php foreach ($perfis as $p) { ?>
+                                                <option value="<?= $p['idPerfil'] ?>" <?= ($utilizadores[$i]->getPerfil() == $p['idPerfil'] || $utilizadores[$i]->getPerfil() == $p['nomePerfil']) ? 'selected' : '' ?>>
+                                                    <?= $p['nomePerfil'] ?>
+                                                </option>
+                                            <?php } ?>
                                         </select>
                                     </div>
 
@@ -226,6 +249,60 @@ if (isset($_POST['resetarSenha'])) {
                             </div>
                         </div>
                         <!-- fim da modal -->
+                    <?php } ?>
+
+                    <?php for ($i = 0; $i < count($utilizadores); $i++) {   ?>
+                        <!-- MODAL REMOVER -->
+                        <div class="modalFundo" id="removerModal-<?= $utilizadores[$i]->getIdUtilizador() ?>">
+                            <div class="modalCaixa">
+                                <div class="modalTopo">
+                                    <h2 class="titulo">Remover utilizador</h2>
+                                    <a href="#" class="modalFechar">x</a>
+                                </div>
+
+                                <form method="post" action="">
+                                    <input type="hidden" name="id" value="<?= $utilizadores[$i]->getIdUtilizador() ?>">
+
+                                    <div class="campo">
+                                        <div class="campoTipo">
+                                            <label class="label"><strong>Email</strong></label>
+                                        </div>
+                                        <input type="text" class="input" value="<?= $utilizadores[$i]->getEmail() ?>" readonly>
+                                    </div>
+
+                                    <div class="campo">
+                                        <div class="campoTipo">
+                                            <label class="label"><strong>Apelido do Utilizador</strong></label>
+                                        </div>
+                                        <input type="text" class="input" value="<?= $utilizadores[$i]->getApelido() ?>" readonly>
+                                    </div>
+
+                                    <div class="campo">
+                                        <div class="campoTipo">
+                                            <label class="label"><strong>Contacto</strong></label>
+                                        </div>
+                                        <input type="text" class="input" value="<?= $utilizadores[$i]->getContacto() ?>" readonly>
+                                    </div>
+
+                                    <div class="campo">
+                                        <div class="campoTipo">
+                                            <label class="label"><strong>Username</strong></label>
+                                        </div>
+                                        <input type="text" class="input" value="<?= $utilizadores[$i]->getUsername() ?>" readonly>
+                                    </div>
+
+                                    <div class="campo">
+                                        <label class="label"> <strong>Perfil</strong></label>
+                                        <input type="text" class="input" value="<?= $nomesPerfis[$utilizadores[$i]->getPerfil()] ?? $utilizadores[$i]->getPerfil() ?>" readonly>
+                                    </div>
+
+                                    <div class="acao">
+                                        <button type="submit" name="remover" class="botao">Remover</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        <!-- fim da modal remover -->
                     <?php } ?>
 
 

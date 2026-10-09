@@ -1,10 +1,14 @@
 <?php
 include_once(__DIR__ . "/../controller/caixaController.php");
 include_once __DIR__ . '/../controller/controllerLogin.php';
+
 if (!$sessao->esta_logado()) {
     header("Location: Login.php");
-    exit();
+    exit;
 }
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+
 $perfil = $_SESSION['perfil'];
 ?>
 <!DOCTYPE html>
@@ -40,11 +44,15 @@ $perfil = $_SESSION['perfil'];
             <?php } ?>
 
             <?php if ($perfil == 'AUDITOR') { ?>
-                <a href="ListarLog.php"><span class="icone"></span>Envio</a>
+                <a href="ListarLog.php"><span class="icone"></span>Log</a>
             <?php } ?>
 
         </nav>
-
+        <div style="margin: 15px;">
+            <p>Olá, <?= isset($_SESSION['nome']) ? $_SESSION['nome'] : ''; ?>!</p>
+            <p>Perfil: <?= isset($_SESSION['perfil']) ? $_SESSION['perfil'] : ''; ?></p>
+        </div>
+        <a href="alterarSenha.php" class="sair">Alterar Senha</a>
         <a href="logout.php" class="sair">Log out</a>
     </div>
 

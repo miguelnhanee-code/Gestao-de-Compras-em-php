@@ -4,8 +4,10 @@ include_once __DIR__ . '/../controller/controllerFornecedor.php';
 include_once __DIR__ . '/../controller/controllerLogin.php';
 if (!$sessao->esta_logado()) {
     header("Location: Login.php");
-    exit();
+    exit;
 }
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
 
 $perfil = $_SESSION['perfil'];
 if (isset($_GET['remover'])) {
@@ -13,11 +15,10 @@ if (isset($_GET['remover'])) {
 }
 
 if (isset($_POST['removerFornecedor'])) {
-    global $conexao;
     remocao($_POST['id']);
-    header('Location: ListarProduto.php');
+    header('Location: listarFornecedores.php');
+    exit;
 }
-
 
 
 if (isset($_POST['gravar']) && !empty($_POST['id']) && !empty($_POST['nome']) && !empty($_POST['contacto']) &&  !empty($_POST['endereco']) &&  !empty($_POST['email'])) {
@@ -29,11 +30,14 @@ if (isset($_POST['gravar']) && !empty($_POST['id']) && !empty($_POST['nome']) &&
         $fornecedor->setEmail($_POST['email']);
         edicao($fornecedor);
     }
-    header('Location: listarFornecedores.php');
+    header('Location: listarFornecedores.php#');
     exit;
 }
 
-$fornecedores = listarFornecedor();
+$pesquisa = $_GET['pesquisa'] ?? '';
+$fornecedores = $pesquisa !== '' ? pesquisarFornecedor($pesquisa) : listarFornecedor();
+
+// $fornecedores = listarFornecedor();
 ?>
 <!DOCTYPE html>
 <html lang='en'>
@@ -70,12 +74,16 @@ $fornecedores = listarFornecedor();
             <?php } ?>
 
             <?php if ($perfil == 'AUDITOR') { ?>
-                <a href="ListarLog.php"><span class="icone"></span>Envio</a>
+                <a href="ListarLog.php"><span class="icone"></span>Log</a>
             <?php } ?>
 
 
         </nav>
-
+        <div style="margin: 15px;">
+            <p>Olá, <?= isset($_SESSION['nome']) ? $_SESSION['nome'] : ''; ?>!</p>
+            <p>Perfil: <?= isset($_SESSION['perfil']) ? $_SESSION['perfil'] : ''; ?></p>
+        </div>
+        <a href="alterarSenha.php" class="sair">Alterar Senha</a>
         <a href="logout.php" class="sair">Log out</a>
     </div>
 
@@ -95,15 +103,16 @@ $fornecedores = listarFornecedor();
                     <h1 class="titulo"><strong>Lista de fornecedores</strong></h1>
                 </div>
 
-                <div class="linha">
-                    <div class="campo campoBusca">
-                        <input type="text" name="pesquisa" class="input" placeholder="Pesquisar compra">
+                <form method="get">
+                    <div class="linha">
+                        <div class="campo campoBusca">
+                            <input type="text" name="pesquisa" class="input" placeholder="Pesquisar " value="<?= $pesquisa ?>">
+                        </div>
+                        <div class="campo">
+                            <button type="submit" class="botao">Pesquisar</button>
+                        </div>
                     </div>
-                    <div class="campo">
-                        <button type="button" class="botao">Listar</button>
-                    </div>
-                </div>
-
+                </form>
                 <div class="tabela">
                     <table>
                         <thead>
@@ -131,7 +140,7 @@ $fornecedores = listarFornecedor();
                                         <td><?= $fornecedor->getEmail() ?></td>
                                         <td>
                                             <div class="acoes">
-                                                <?php if ($perfil == 'ADMINISTRADOR' || $perfil == 'AUDITOR' || $perfil == 'SUEPER OPERADOR') { ?>
+                                                <?php if ($perfil == 'ADMINISTRADOR' || $perfil == 'AUDITOR' || $perfil == 'SUPER OPERADOR') { ?>
                                                     <a href="#editar-<?= $fornecedor->getIdFornecedor() ?>" class="botaoAtualizar">Editar</a>
                                                     <a href="#remover-<?= $fornecedor->getIdFornecedor() ?>" class="botaoRemover">remover</a>
 
@@ -151,7 +160,7 @@ $fornecedores = listarFornecedor();
                 <?php foreach ($fornecedores as $fornecedor) { ?>
                     <!-- modal editar -->
                     <div class="modalFundo" id="editar-<?= $fornecedor->getIdFornecedor() ?>">
-                        <a href="#" class="modalOverlay" aria-label="Fechar"></a>
+                        <!-- <a href="#" class="modalOverlay" aria-label="Fechar"></a> -->
                         <div class="modalCaixa">
                             <div class="modalTopo">
                                 <h2 class="titulo">Editar fornecedor</h2>
@@ -204,7 +213,7 @@ $fornecedores = listarFornecedor();
                 <?php foreach ($fornecedores as $fornecedor) { ?>
                     <!-- modal editar -->
                     <div class="modalFundo" id="remover-<?= $fornecedor->getIdFornecedor() ?>">
-                        <a href="#" class="modalOverlay" aria-label="Fechar"></a>
+                        <!-- <a href="#" class="modalOverlay" aria-label="Fechar"></a> -->
                         <div class="modalCaixa">
                             <div class="modalTopo">
                                 <h2 class="titulo">Remover fornecedor</h2>

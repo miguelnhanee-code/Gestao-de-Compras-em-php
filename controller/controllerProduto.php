@@ -1,5 +1,6 @@
 <?php
 include_once __DIR__ . '/../model/Produto.php';
+include_once(__DIR__ . "/controllerLog.php");
 
 $conexao = mysqli_connect("localhost", "root", "", "gestaocompra");
 
@@ -14,6 +15,9 @@ function cadastrarProduto($produto)
     } else {
         $sql = "insert into produto values(null, '{$produto->getProduto()}', {$produto->getPrecoUnitario()},'{$produto->getDataConfecao()}', '{$produto->getDataValidade()}')";
         $result = mysqli_query($conexao, $sql);
+        if ($result) {
+            registarAccao("Cadastrou Produto");
+        }
         if ($result) {
             // header('location:../view/ListarProduto.php');
         } else {
@@ -42,6 +46,9 @@ function removerProduto($id)
     global $conexao;
     $sql = "delete from produto where idProduto=" . $id;
     $result = mysqli_query($conexao, $sql);
+    if ($result) {
+        registarAccao("Removeu Produto");
+    }
     // header('location:../view/ListarProduto.php');
 }
 
@@ -53,6 +60,9 @@ function actualizarProduto($produto)
     where idProduto={$produto->getIdproduto()}";
 
     $result = mysqli_query($conexao, $sql);
+    if ($result) {
+        registarAccao("Actualizou Produto");
+    }
     if ($result) {
         // header('location:../view/ListarProduto.php');
     } else {
@@ -71,4 +81,21 @@ function encontraProduto($id)
     $rs = mysqli_fetch_assoc($result);
     $produto = new Produto($rs['idProduto'], $rs['produto'], $rs['precoUnitario'], $rs['dataValidade'], $rs['dataConfecao']);
     return $produto;
+}
+
+
+function pesquisarProduto($pesquisa)
+{
+    global $conexao;
+    $produtos = array();
+    $pesquisa = mysqli_real_escape_string($conexao, $pesquisa);
+    $sql = "select * from produto where produto like '%{$pesquisa}%' or precoUnitario like '%{$pesquisa}%' or dataValidade like '%{$pesquisa}%' or dataConfecao like '%{$pesquisa}%'";
+    $result = mysqli_query($conexao, $sql);
+    if ($result) {
+        while ($rs = mysqli_fetch_assoc($result)) {
+            $produto = new Produto($rs['idProduto'], $rs['produto'], $rs['precoUnitario'], $rs['dataValidade'], $rs['dataConfecao']);
+            array_push($produtos, $produto);
+        }
+    }
+    return $produtos;
 }

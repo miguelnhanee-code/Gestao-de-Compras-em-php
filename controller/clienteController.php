@@ -2,6 +2,7 @@
 
 //  include_once("clienteModel.php");
 include_once(__DIR__ . "/../model/clienteModel.php");
+include_once(__DIR__ . "/controllerLog.php");
 $conexao = mysqli_connect("localhost", "root", "", "gestaocompra");
 
 function listarCliente()
@@ -11,6 +12,7 @@ function listarCliente()
     $sql = "SELECT c.idCliente, c.nomeCliente, c.apelidoCliente, p.idCaixa, p.nomeCaixa 
         FROM cliente c inner JOIN caixa p ON c.idCaixa = p.idCaixa";
     $result = mysqli_query($conexao, $sql);
+
     if ($result) {
         while ($rs = mysqli_fetch_assoc($result)) {
             $cliente = new Cliente($rs['idCliente'], $rs['nomeCliente'], $rs['apelidoCliente'], $rs['nomeCaixa']);
@@ -35,7 +37,10 @@ function criacao($cliente)
     } else {
         $sql = "insert into cliente values (null,'{$cliente->getNomeCliente()}', '{$cliente->getApelidoCliente()}', '{$cliente->getIdCaixa()}')";
         $result = mysqli_query($conexao, $sql);
-        echo "Cliente inserida";
+        echo "Cliente inserido";
+        if ($result) {
+            registarAccao("Cliente Cadatrador");
+        }
         if ($result) {
             // header('location:index.php');
         } else
@@ -47,6 +52,9 @@ function remocao($id)
     global $conexao;
     $sql = "delete from cliente  where idCliente=" . $id;
     $result = mysqli_query($conexao, $sql);
+    if ($result) {
+        registarAccao("Cliente Removido");
+    }
     // header('location:index.php');
 }
 
@@ -55,6 +63,10 @@ function edicao($cliente)
     global $conexao;
     $sql = "UPDATE cliente SET  nomeCliente='{$cliente->getNomeCliente()}', apelidoCliente='{$cliente->getApelidoCliente()}', idCaixa='{$cliente->getIdCaixa()}' WHERE idCliente='{$cliente->getIdCliente()}'";
     $result = mysqli_query($conexao, $sql);
+    if ($result) {
+        registarAccao("Cliente Editado");
+    }
+
     if ($result) {
         //  header('location:index.php');
     } else
@@ -85,4 +97,24 @@ function listarCaixas()
         }
     }
     return $caixas;
+}
+
+
+function pesquisarCliente($pesquisa)
+{
+    global $conexao;
+    $clientes = array();
+    $pesquisa = mysqli_real_escape_string($conexao, $pesquisa);
+    $sql = "SELECT c.idCliente, c.nomeCliente, c.apelidoCliente, p.idCaixa, p.nomeCaixa 
+        FROM cliente c inner JOIN caixa p ON c.idCaixa = p.idCaixa
+        WHERE c.nomeCliente like '%{$pesquisa}%' or c.apelidoCliente like '%{$pesquisa}%' or p.nomeCaixa like '%{$pesquisa}%'";
+    $result = mysqli_query($conexao, $sql);
+
+    if ($result) {
+        while ($rs = mysqli_fetch_assoc($result)) {
+            $cliente = new Cliente($rs['idCliente'], $rs['nomeCliente'], $rs['apelidoCliente'], $rs['nomeCaixa']);
+            array_push($clientes, $cliente);
+        }
+    }
+    return $clientes;
 }

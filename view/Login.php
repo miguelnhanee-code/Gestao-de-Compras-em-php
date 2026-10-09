@@ -2,6 +2,15 @@
 // session_start();
 include_once(__DIR__ . "/../controller/controllerLogin.php");
 
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
+
+// Ao abrir a tela de login (sem enviar o formulário), termina qualquer sessão ativa
+if (!isset($_POST['entrar'])) {
+    $sessao->logout();
+    session_destroy();
+}
+
 if (isset($_POST['entrar'])) {
     if (!empty($_POST['email']) && !empty($_POST['senha'])) {
 

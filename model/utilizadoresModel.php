@@ -1,5 +1,4 @@
 <?php
-
 class utilizadores
 {
     private $idUtilizador;
@@ -10,9 +9,11 @@ class utilizadores
     private $username;
     private $senha;
     private $perfil;
-    
+    private $bi;
+    private $estadoCivil;
+    private $sexo;
 
-    public function __construct($idUtilizador, $nome, $apelido, $email, $contacto, $username, $senha, $perfil)
+    public function __construct($idUtilizador, $nome, $apelido, $email, $contacto, $username, $senha, $perfil, $bi, $estadoCivil, $sexo)
     {
         $this->idUtilizador = $idUtilizador;
         $this->nome = $nome;
@@ -22,6 +23,9 @@ class utilizadores
         $this->username = $username;
         $this->senha = $senha;
         $this->perfil = $perfil;
+        $this->bi = $bi;
+        $this->estadoCivil = $estadoCivil;
+        $this->sexo = $sexo;
     }
 
     public function getIdUtilizador()
@@ -109,6 +113,39 @@ class utilizadores
     public function setPerfil($perfil)
     {
         $this->perfil = $perfil;
+        return $this;
+    }
+
+    public function getBi()
+    {
+        return $this->bi;
+    }
+
+    public function setBi($bi)
+    {
+        $this->bi = $bi;
+        return $this;
+    }
+
+    public function getEstadoCivil()
+    {
+        return $this->estadoCivil;
+    }
+
+    public function setEstadoCivil($estadoCivil)
+    {
+        $this->estadoCivil = $estadoCivil;
+        return $this;
+    }
+
+    public function getSexo()
+    {
+        return $this->sexo;
+    }
+
+    public function setSexo($sexo)
+    {
+        $this->sexo = $sexo;
         return $this;
     }
 }

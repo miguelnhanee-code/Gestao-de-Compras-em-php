@@ -1,6 +1,7 @@
 <?php
 
 include_once(__DIR__ . "/../model/utilizadoresModel.php");
+include_once(__DIR__ . "/controllerLog.php");
 // include_once(__DIR__ . "/../model/Sessao.php");
 
 class Sessao
@@ -79,9 +80,12 @@ function login($email, $senha)
     $result = mysqli_query($conexao, $sql);
     if (mysqli_num_rows($result) > 0) {
         $utilizador = mysqli_fetch_assoc($result);
-        if ($senha == $utilizador['senha']) {
+        if (password_verify($senha, $utilizador['senha'])) {
             $sessao->login($utilizador);
             header("location:../view/Dashboard.php");
+            if ($result) {
+                registarAccao("Log in");
+            }
             exit();
         } else {
             echo "Senha incorrecta";

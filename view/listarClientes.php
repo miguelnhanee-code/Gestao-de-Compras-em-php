@@ -4,8 +4,10 @@ include_once(__DIR__ . "/../controller/clienteController.php");
 include_once __DIR__ . '/../controller/controllerLogin.php';
 if (!$sessao->esta_logado()) {
     header("Location: Login.php");
-    exit();
+    exit;
 }
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Pragma: no-cache");
 $perfil = $_SESSION['perfil'];
 
 $clientes = listarCliente();
@@ -26,9 +28,12 @@ if (isset($_POST['guardar']) && !empty($_POST['id']) && !empty($_POST['nome_clie
         $cliente->setIdCaixa($_POST['idCaixa']);
         edicao($cliente);
     }
-    header('Location: listarClientes.php');
+    header('Location: listarClientes.php#');
     exit;
 }
+
+$pesquisa = $_GET['pesquisa'] ?? '';
+$clientes = $pesquisa !== '' ? pesquisarCliente($pesquisa) : listarCliente();
 
 ?>
 
@@ -69,10 +74,14 @@ if (isset($_POST['guardar']) && !empty($_POST['id']) && !empty($_POST['nome_clie
             <?php } ?>
 
             <?php if ($perfil == 'AUDITOR') { ?>
-                <a href="ListarLog.php"><span class="icone"></span>Envio</a>
+                <a href="ListarLog.php"><span class="icone"></span>Log</a>
             <?php } ?>
         </nav>
-
+        <div style="margin: 15px;">
+            <p>Olá, <?= isset($_SESSION['nome']) ? $_SESSION['nome'] : ''; ?>!</p>
+            <p>Perfil: <?= isset($_SESSION['perfil']) ? $_SESSION['perfil'] : ''; ?></p>
+        </div>
+        <a href="alterarSenha.php" class="sair">Alterar Senha</a>
         <a href="logout.php" class="sair">Log out</a>
     </div>
 
@@ -92,14 +101,16 @@ if (isset($_POST['guardar']) && !empty($_POST['id']) && !empty($_POST['nome_clie
                     <h1 class="titulo"><strong>Lista de Clientes</strong></h1>
                 </div>
 
-                <div class="linha">
-                    <div class="campo campoBusca">
-                        <input type="text" name="pesquisa" class="input" placeholder="Pesquisar compra">
+                <form method="get">
+                    <div class="linha">
+                        <div class="campo campoBusca">
+                            <input type="text" name="pesquisa" class="input" placeholder="Pesquisar " value="<?= $pesquisa ?>">
+                        </div>
+                        <div class="campo">
+                            <button type="submit" class="botao">Pesquisar</button>
+                        </div>
                     </div>
-                    <div class="campo">
-                        <button type="button" class="botao">Listar</button>
-                    </div>
-                </div>
+                </form>
 
                 <div class="tabela">
                     <table>
@@ -128,7 +139,7 @@ if (isset($_POST['guardar']) && !empty($_POST['id']) && !empty($_POST['nome_clie
 
                                     <td>
                                         <div class="acoes">
-                                            <?php if ($perfil == 'ADMINISTRADOR' || $perfil == 'AUDITOR' || $perfil == 'SUEPER OPERADOR') { ?>
+                                            <?php if ($perfil == 'ADMINISTRADOR' || $perfil == 'AUDITOR' || $perfil == 'SUPER OPERADOR') { ?>
 
                                                 <a href="#editar-<?= $cliente->getIdCliente() ?>" class="botaoAtualizar"> Editar </a>
                                                 <a href="#remover-<?= $cliente->getIdCliente() ?>" class="botaoRemover"> REMOVER </a>
@@ -151,7 +162,7 @@ if (isset($_POST['guardar']) && !empty($_POST['id']) && !empty($_POST['nome_clie
                     <?php foreach ($clientes as $cliente) {   ?>
                         <!-- MODAL EDITAR-->
                         <div class="modalFundo" id="editar-<?= $cliente->getIdCliente() ?>">
-                            <a href="#" class="modalOverlay" aria-label="Fechar"></a>
+                            <!-- <a href="#" class="modalOverlay" aria-label="Fechar"></a> -->
                             <div class="modalCaixa">
                                 <div class="modalTopo">
                                     <h2 class="titulo">Editar Cliente</h2>
@@ -203,7 +214,7 @@ if (isset($_POST['guardar']) && !empty($_POST['id']) && !empty($_POST['nome_clie
                     <?php foreach ($clientes as $cliente) {   ?>
                         <!-- MODAL REMOVER-->
                         <div class="modalFundo" id="remover-<?= $cliente->getIdCliente() ?>">
-                            <a href="#" class="modalOverlay" aria-label="Fechar"></a>
+                            <!-- <a href="#" class="modalOverlay" aria-label="Fechar"></a> -->
                             <div class="modalCaixa">
                                 <div class="modalTopo">
                                     <h2 class="titulo">RENOVER Cliente</h2>
