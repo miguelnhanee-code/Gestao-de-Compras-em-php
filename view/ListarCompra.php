@@ -18,7 +18,7 @@ $cliente = listarCliente();
 
 if (isset($_POST['remover'])) {
     global $conexao;
-    removerCompra($_POST['id']);
+    remocaoCompra($_POST['id']);
     header('Location: ListarCompra.php');
 }
 
@@ -34,13 +34,18 @@ if (
         $compra->setIdcliente($_POST['idcliente']);
         $compra->setQuantidade($_POST['quantidade']);
         $compra->setDataCompra($_POST['dataCompra']);
-        actualizarCompra($compra);
+        edicaoCompra($compra);
     }
     header('Location: ListarCompra.php#');
 }
 
-$pesquisa = $_GET['pesquisa'] ?? '';
-$compras = $pesquisa !== '' ? pesquisarCompra($pesquisa) : listarCompra();
+$compras = listarCompra();
+$pesquisa = $_POST['pesquisaCampo'] ?? '';
+if (isset($_POST['pesquisarBt'])) {
+    if (!empty($pesquisa)) {
+        $compras = pesquisarCompra($pesquisa);
+    }
+}
 
 ?>
 
@@ -105,13 +110,13 @@ $compras = $pesquisa !== '' ? pesquisarCompra($pesquisa) : listarCompra();
                     <h1 class="titulo"><strong>Lista de Compras</strong></h1>
                 </div>
 
-                <form method="get">
+                <form method="post">
                     <div class="linha">
                         <div class="campo campoBusca">
-                            <input type="text" name="pesquisa" class="input" placeholder="Pesquisar " value="<?= $pesquisa ?>">
+                            <input type="text" name="pesquisaCampo" class="input" placeholder="Pesquisar " value="<?= $pesquisa ?>">
                         </div>
                         <div class="campo">
-                            <button type="submit" class="botao">Pesquisar</button>
+                            <button type="submit" name="pesquisarBt" class="botao">Pesquisar</button>
                         </div>
                     </div>
                 </form>
@@ -122,6 +127,7 @@ $compras = $pesquisa !== '' ? pesquisarCompra($pesquisa) : listarCompra();
                                 <th>ID</th>
                                 <th>Nome do Produto</th>
                                 <th>Nome do Cliente</th>
+                                <th>Nome do Caixa</th>
                                 <th>Preco Unitario</th>
                                 <th>Quantidade</th>
                                 <th>Data de Compra</th>
@@ -135,17 +141,17 @@ $compras = $pesquisa !== '' ? pesquisarCompra($pesquisa) : listarCompra();
                                 <td>SEM NENHUMA COMPRA REGISTADA</td>
                             </tr>
                         <?php } else { ?>
-                            <?php foreach ($compras as $dadosCompra) {
-                                $compra = $dadosCompra['compra']; ?>
+                            <?php foreach ($compras as $compra) { ?>
 
                                 <tr>
                                     <td><?= $compra->getIdcompra() ?></td>
-                                    <td><?= $dadosCompra['nomeProduto'] ?></td>
-                                    <td><?= $dadosCompra['nomeCliente'] ?></td>
-                                    <td><?= $dadosCompra['precoProduto'] ?></td>
+                                    <td><?= $compra->getNomeProduto() ?></td>
+                                    <td><?= $compra->getNomeCliente() ?></td>
+                                    <td><?= $compra->getNomeCaixa() ?></td>
+                                    <td><?= $compra->getPrecoProduto() ?></td>
                                     <td><?= $compra->getQuantidade() ?></td>
                                     <td><?= $compra->getDataCompra() ?></td>
-                                    <td><?= $compra->getQuantidade() * $dadosCompra['precoProduto'] ?></td>
+                                    <td><?= $compra->getQuantidade() * $compra->getPrecoProduto() ?></td>
 
                                     <td>
                                         <div class="acoes">
@@ -168,8 +174,7 @@ $compras = $pesquisa !== '' ? pesquisarCompra($pesquisa) : listarCompra();
 
                     </table>
 
-                    <?php foreach ($compras as $linha) {
-                        $compra = $linha['compra']; ?>
+                    <?php foreach ($compras as $compra) { ?>
                         <!-- MODAL-->
                         <div class="modalFundo" id="editar-<?= $compra->getIdcompra() ?>">
                             <!-- <a href="#" class="modalOverlay" aria-label="Fechar"></a> -->
@@ -189,7 +194,7 @@ $compras = $pesquisa !== '' ? pesquisarCompra($pesquisa) : listarCompra();
                                         <select name="idproduto" class="input">
                                             <?php foreach ($produtos as $produto) { ?>
                                                 <option value="<?= $produto->getIdproduto() ?>"
-                                                    <?= $produto->getIdproduto() == $compra->getIdproduto() ?>>
+                                                    <?= $produto->getIdproduto() == $compra->getIdproduto() ? 'selected' : '' ?>>
                                                     <?= $produto->getProduto() ?>
                                                 </option>
                                             <?php } ?>
@@ -204,7 +209,7 @@ $compras = $pesquisa !== '' ? pesquisarCompra($pesquisa) : listarCompra();
                                             <select name="idcliente" class="input">
                                                 <?php foreach ($cliente as $clientes) { ?>
                                                     <option value="<?= $clientes->getIdcliente() ?>"
-                                                        <?= $clientes->getIdcliente() == $compra->getIdcliente() ?>>
+                                                        <?= $clientes->getIdcliente() == $compra->getIdcliente() ? 'selected' : '' ?>>
                                                         <?= $clientes->getNomeCliente() ?>
                                                     </option>
                                                 <?php } ?>
@@ -235,8 +240,7 @@ $compras = $pesquisa !== '' ? pesquisarCompra($pesquisa) : listarCompra();
                         <!-- fim da modal -->
                     <?php } ?>
 
-                    <?php foreach ($compras as $linha) {
-                        $compra = $linha['compra']; ?>
+                    <?php foreach ($compras as $compra) { ?>
                         <!-- MODAL-->
                         <div class="modalFundo" id="remover-<?= $compra->getIdcompra() ?>">
                             <!-- <a href="#" class="modalOverlay" aria-label="Fechar"></a> -->
@@ -256,7 +260,7 @@ $compras = $pesquisa !== '' ? pesquisarCompra($pesquisa) : listarCompra();
                                         <select name="idproduto" class="input">
                                             <?php foreach ($produtos as $produto) { ?>
                                                 <option value="<?= $produto->getIdproduto() ?>"
-                                                    <?= $produto->getIdproduto() == $compra->getIdproduto() ?>>
+                                                    <?= $produto->getIdproduto() == $compra->getIdproduto() ? 'selected' : '' ?>>
                                                     <?= $produto->getProduto() ?>
                                                 </option>
                                             <?php } ?>
@@ -271,7 +275,7 @@ $compras = $pesquisa !== '' ? pesquisarCompra($pesquisa) : listarCompra();
                                             <select name="idcliente" class="input">
                                                 <?php foreach ($cliente as $clientes) { ?>
                                                     <option value="<?= $clientes->getIdcliente() ?>"
-                                                        <?= $clientes->getIdcliente() == $compra->getIdcliente() ?>>
+                                                        <?= $clientes->getIdcliente() == $compra->getIdcliente() ? 'selected' : '' ?>>
                                                         <?= $clientes->getNomeCliente() ?>
                                                     </option>
                                                 <?php } ?>

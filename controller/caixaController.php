@@ -5,9 +5,6 @@ include_once(__DIR__ . "/controllerLog.php");
 $conexao = mysqli_connect("localhost", "root", "", "gestaocompra");
 
 
-// class caixaController    
-// {
-
 function listarCaixa()
 {
     global $conexao;

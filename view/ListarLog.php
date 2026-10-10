@@ -15,10 +15,10 @@ if (isset($_POST['remover'])) {
 }
 
 $logs = listaDeLogs();
-$pesquisa = $_POST['pesquisaCampo'];
+$pesquisa = $_POST['pesquisaCampo'] ?? '';
 if (isset($_POST['pesquisarBt'])) {
     if (!empty($pesquisa)) {
-       $logs =  pesquisarLog($pesquisa);
+        $logs = pesquisarLog($pesquisa);
     }
 }
 

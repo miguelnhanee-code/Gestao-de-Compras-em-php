@@ -21,7 +21,7 @@ if (isset($_POST['gravar'])) {
 
     if (!empty($_POST['idproduto']) && !empty($_POST['idcliente']) && !empty($_POST['quantidade']) && !empty($_POST['dataCompra'])) {
         $compra = new Compra(null, $_POST['quantidade'], $_POST['dataCompra'], $_POST['idproduto'], $_POST['idcliente']);
-        cadastrarCompra($compra);
+        criacaoCompra($compra);
     }
 }
 ?>
@@ -63,7 +63,7 @@ if (isset($_POST['gravar'])) {
                 <a href="ListarLog.php"><span class="icone"></span>Log</a>
             <?php } ?>
         </nav>
-         <div style="margin: 15px;">
+        <div style="margin: 15px;">
             <p>Olá, <?= isset($_SESSION['nome']) ? $_SESSION['nome'] : ''; ?>!</p>
             <p>Perfil: <?= isset($_SESSION['perfil']) ? $_SESSION['perfil'] : ''; ?></p>
         </div>
@@ -127,6 +127,7 @@ if (isset($_POST['gravar'])) {
                             </div>
                             <input type="date" name="dataCompra" class="input">
                         </div>
+                      
                     </div>
 
                     <div class="acao">

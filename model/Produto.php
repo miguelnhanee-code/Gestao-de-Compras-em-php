@@ -1,19 +1,26 @@
 <?php
+
 class Produto
 {
     private $idproduto;
     private $nomeproduto;
-    private $precounitario;
-    private $datavalidade;
-    private $dataconfecao;
+    private $precoUnitario;
+    private $dataValidade;
+    private $dataConfecao;
+    private $stock;
+    private $idFornecedor;
+    private $unidadeMedida;
 
-    public function __construct($idproduto, $nomeproduto, $precoUnitario, $dataValidade, $dataConfecao)
+    public function __construct($idproduto, $nomeproduto, $precoUnitario, $dataValidade, $dataConfecao, $stock = null, $idFornecedor = null, $unidadeMedida = null)
     {
         $this->idproduto = $idproduto;
         $this->nomeproduto = $nomeproduto;
-        $this->precounitario = $precoUnitario;
-        $this->datavalidade = $dataValidade;
-        $this->dataconfecao = $dataConfecao;
+        $this->precoUnitario = $precoUnitario;
+        $this->dataValidade = $dataValidade;
+        $this->dataConfecao = $dataConfecao;
+        $this->stock = $stock;
+        $this->idFornecedor = $idFornecedor;
+        $this->unidadeMedida = $unidadeMedida;
     }
 
     public function getIdproduto()
@@ -34,36 +41,72 @@ class Produto
         $this->nomeproduto = $nomeproduto;
     }
 
+    public function getNomeproduto()
+    {
+        return $this->nomeproduto;
+    }
+    public function setNomeproduto($nomeproduto)
+    {
+        $this->nomeproduto = $nomeproduto;
+    }
+
     public function getPrecoUnitario()
     {
-        return $this->precounitario;
+        return $this->precoUnitario;
     }
     public function setPrecoUnitario($precoUnitario)
     {
-        $this->precounitario = $precoUnitario;
+        $this->precoUnitario = $precoUnitario;
     }
 
     public function getDataValidade()
     {
-        return $this->datavalidade;
+        return $this->dataValidade;
     }
-    public function setDataValidade($datavalidade)
+    public function setDataValidade($dataValidade)
     {
-        $this->datavalidade = $datavalidade;
+        $this->dataValidade = $dataValidade;
     }
 
     public function getDataConfecao()
     {
-        return $this->dataconfecao;
+        return $this->dataConfecao;
     }
-    public function setDataConfecao($dataconfecao)
+    public function setDataConfecao($dataConfecao)
     {
-        $this->dataconfecao = $dataconfecao;
+        $this->dataConfecao = $dataConfecao;
+    }
+
+    public function getStock()
+    {
+        return $this->stock;
+    }
+    public function setStock($stock)
+    {
+        $this->stock = $stock;
+    }
+
+    public function getIdFornecedor()
+    {
+        return $this->idFornecedor;
+    }
+    public function setIdFornecedor($idFornecedor)
+    {
+        $this->idFornecedor = $idFornecedor;
+    }
+
+    public function getUnidadeMedida()
+    {
+        return $this->unidadeMedida;
+    }
+    public function setUnidadeMedida($unidadeMedida)
+    {
+        $this->unidadeMedida = $unidadeMedida;
     }
 
     public function __toString()
     {
-        return "Produto:{$this->nomeproduto} Preco:{$this->precounitario}  Validade:{$this->datavalidade} 
-        Confeccao:{$this->dataconfecao}<br>";
+        return "Produto:{$this->nomeproduto} Preco:{$this->precoUnitario}  Validade:{$this->dataValidade} 
+        Confeccao:{$this->dataConfecao}<br>";
     }
 }

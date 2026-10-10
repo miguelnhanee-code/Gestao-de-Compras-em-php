@@ -1,5 +1,6 @@
 <?php
 include_once __DIR__ . '/../controller/controllerProduto.php';
+include_once __DIR__ . '/../controller/controllerFornecedor.php';
 include_once __DIR__ . '/../controller/controllerLogin.php';
 
 if (!$sessao->esta_logado()) {
@@ -13,12 +14,11 @@ $perfil = $_SESSION['perfil'];
 
 if (isset($_POST['gravar'])) {
     if (!empty($_POST['produto']) && !empty($_POST['precoUnitario']) && !empty($_POST['dataConfeccao']) && !empty($_POST['dataValidade'])) {
-
-        $produto = new Produto(null, $_POST['produto'], $_POST['precoUnitario'], $_POST['dataValidade'], $_POST['dataConfeccao']);
-
-        cadastrarProduto($produto);
+        $produto = new Produto(null, $_POST['produto'], $_POST['precoUnitario'], $_POST['dataValidade'], $_POST['dataConfeccao'], $_POST['stock'], $_POST['idFornecedor'], $_POST['unidadeMedida']);
+        criacaoProduto($produto);
     }
 }
+$fornecedores = listarFornecedor();
 ?>
 
 
@@ -83,45 +83,103 @@ if (isset($_POST['gravar'])) {
                 <form method="post">
 
                     <div class="topo">
-                        <h1 class="titulo"><strong>Novo produto</strong></h1>
+                        <h1 class="titulo">
+                            <strong>Novo produto</strong>
+                        </h1>
                     </div>
 
                     <div class="campo">
                         <div class="campoTipo">
-                            <label class="label"><strong>Nome do produto</strong></label>
+                            <label class="label">
+                                <strong>Nome do produto</strong>
+                            </label>
                         </div>
-                        <input type="text" name="produto" class="input">
+
+                        <input type="text" name="produto" class="input" required>
                     </div>
 
                     <div class="linha">
+
                         <div class="campo campoFlex">
                             <div class="campoTipo">
-                                <label class="label"><strong>Preco unitario</strong></label>
+                                <label class="label">
+                                    <strong>Preço unitário</strong>
+                                </label>
                             </div>
-                            <input type="text" name="precoUnitario" class="input" value="0.00">
+
+                            <input type="number" name="precoUnitario" class="input" placeholder="0.00" required>
+                        </div>
+
+
+                        <div class="campo campoFlex">
+                            <div class="campoTipo">
+                                <label class="label">
+                                    <strong>Unidade Medida</strong>
+                                </label>
+                            </div>
+                            <input type="text" name="unidadeMedida" class="input" required>
                         </div>
 
                         <div class="campo campoFlex">
                             <div class="campoTipo">
-                                <label class="label"><strong>Data de Confeccao</strong></label>
+                                <label class="label">
+                                    <strong>Stock</strong>
+                                </label>
                             </div>
-                            <input type="date" name="dataConfeccao" class="input">
-                        </div>
 
-                        <div class="campo campoFlex">
-                            <div class="campoTipo">
-                                <label class="label"><strong>Data de Validade</strong></label>
-                            </div>
-                            <input type="date" name="dataValidade" class="input">
+                            <input type="number" name="stock" class="input" placeholder="0" required>
                         </div>
 
                     </div>
+                    <div class="campo campoFlex">
+                        <div class="campoTipo">
+                            <label class="label">
+                                <strong>Data de Confecao</strong>
+                            </label>
+                        </div>
 
+                        <input type="date" name="dataConfeccao" class="input" required>
+                    </div>
+
+                    <div class="linha">
+
+                        <div class="campo campoFlex">
+                            <div class="campoTipo">
+                                <label class="label">
+                                    <strong>Data de validade</strong>
+                                </label>
+                            </div>
+
+                            <input type="date" name="dataValidade" class="input" required>
+                        </div>
+
+
+
+                        <div class="campo campoFlex">
+                            <div class="campoTipo">
+                                <label class="label">
+                                    <strong>Fornecedor</strong>
+                                </label>
+                            </div>
+
+                            <select name="idFornecedor" class="input" required>
+                                <option value="">Seleccione o fornecedor</option>
+
+                                <?php foreach ($fornecedores as $fornecedor) { ?>
+                                    <option value="<?= $fornecedor->getIdFornecedor() ?>">
+                                        <?= $fornecedor->getNomeFornecedor() ?>
+                                    </option>
+                                <?php } ?>
+                            </select>
+                        </div>
+
+                    </div>
                     <div class="acao">
-                        <button type="submit" name="gravar" class="botao">Cadastrar produto</button>
+                        <button type="submit" name="gravar" class="botao"> Cadastrar produto </button>
                     </div>
 
                 </form>
+
             </div>
         </div>
 

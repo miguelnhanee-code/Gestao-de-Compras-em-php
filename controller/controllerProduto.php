@@ -1,99 +1,100 @@
 <?php
-include_once __DIR__ . '/../model/Produto.php';
-include_once(__DIR__ . "/controllerLog.php");
 
+include_once(__DIR__ . "/../model/Produto.php");
+include_once(__DIR__ . "/controllerLog.php");
 $conexao = mysqli_connect("localhost", "root", "", "gestaocompra");
 
-
-function cadastrarProduto($produto)
-{
-    global $conexao;
-    $sql = "select * from produto where produto='{$produto->getProduto()}'";
-    $result = mysqli_query($conexao, $sql);
-    if (mysqli_num_rows($result) > 0) {
-        echo "O produto ja existe";
-    } else {
-        $sql = "insert into produto values(null, '{$produto->getProduto()}', {$produto->getPrecoUnitario()},'{$produto->getDataConfecao()}', '{$produto->getDataValidade()}')";
-        $result = mysqli_query($conexao, $sql);
-        if ($result) {
-            registarAccao("Cadastrou Produto");
-        }
-        if ($result) {
-            // header('location:../view/ListarProduto.php');
-        } else {
-            echo "Ocorreu um erro ao gravar";
-        }
-    }
-}
 
 function listarProduto()
 {
     global $conexao;
     $produtos = array();
-    $sql = "select * from produto";
+    $sql = "select p.*, f.nomeFornecedor from produto p left join fornecedor f on f.idFornecedor = p.idFornecedor";
     $result = mysqli_query($conexao, $sql);
+
     if ($result) {
         while ($rs = mysqli_fetch_assoc($result)) {
-            $produto = new Produto($rs['idProduto'], $rs['produto'], $rs['precoUnitario'], $rs['dataValidade'], $rs['dataConfecao']);
+            $produto = new Produto($rs['idProduto'], $rs['produto'], $rs['precoUnitario'], $rs['dataValidade'], $rs['dataConfecao'], $rs['stock'], $rs['nomeFornecedor'], $rs['unidadeMedida']);
             array_push($produtos, $produto);
         }
     }
     return $produtos;
 }
 
-function removerProduto($id)
+function criacaoProduto($produto)
 {
     global $conexao;
-    $sql = "delete from produto where idProduto=" . $id;
+    $sql = "select * from produto where produto='{$produto->getProduto()}'";
+    $result = mysqli_query($conexao, $sql);
+    if (mysqli_num_rows($result) > 0) {
+        echo "O produto ja existe na agenda";
+    } else {
+        $idFornecedor = $produto->getIdFornecedor() ?: 'null';
+        $sql = "insert into produto (idProduto, produto, precoUnitario, dataConfecao, dataValidade, idFornecedor, stock, unidadeMedida)
+        values (null, '{$produto->getProduto()}', {$produto->getPrecoUnitario()}, '{$produto->getDataConfecao()}', '{$produto->getDataValidade()}', {$idFornecedor}, {$produto->getStock()}, '{$produto->getUnidadeMedida()}')";
+        $result = mysqli_query($conexao, $sql);
+        if ($result) {
+            registarAccao("Cadastrou produto");
+        }
+        echo "Produto inserido";
+        if ($result) {
+            // header('location:../view/ListarProduto.php');
+        } else
+            echo "Ocorreu um erro ao gravar os dados";
+    }
+}
+function remocaoProduto($idProduto)
+{
+    global $conexao;
+    $sql = "delete from produto where idProduto=" . $idProduto;
     $result = mysqli_query($conexao, $sql);
     if ($result) {
-        registarAccao("Removeu Produto");
+        registarAccao("Removeu produto");
     }
     // header('location:../view/ListarProduto.php');
 }
 
-function actualizarProduto($produto)
+function edicaoProduto($produto)
 {
     global $conexao;
-    $sql = "update produto set produto='{$produto->getProduto()}', precoUnitario={$produto->getPrecoUnitario()},
-    dataConfecao='{$produto->getDataConfecao()}', dataValidade='{$produto->getDataValidade()}'
-    where idProduto={$produto->getIdproduto()}";
 
+    $idFornecedor = $produto->getIdFornecedor() ?: 'null';
+    $sql = "update produto set produto='{$produto->getProduto()}', precoUnitario={$produto->getPrecoUnitario()},
+    dataConfecao='{$produto->getDataConfecao()}', dataValidade='{$produto->getDataValidade()}',
+    idFornecedor={$idFornecedor}, stock={$produto->getStock()}, unidadeMedida='{$produto->getUnidadeMedida()}'
+    where idProduto={$produto->getIdproduto()}";
     $result = mysqli_query($conexao, $sql);
     if ($result) {
-        registarAccao("Actualizou Produto");
+        registarAccao("Editou produto");
     }
     if ($result) {
-        // header('location:../view/ListarProduto.php');
-    } else {
-        echo "Ocorreu um erro ao atualizar os dados.";
-    }
+        //  header('location:../view/ListarProduto.php');
+    } else
+        echo "Ocorreu um erro ao atualizar os dados";
 }
 
-
-
-//rever
 function encontraProduto($id)
 {
     global $conexao;
     $sql = "select * from produto where idProduto=" . $id;
     $result = mysqli_query($conexao, $sql);
     $rs = mysqli_fetch_assoc($result);
-    $produto = new Produto($rs['idProduto'], $rs['produto'], $rs['precoUnitario'], $rs['dataValidade'], $rs['dataConfecao']);
+    $produto = new Produto($rs['idProduto'], $rs['produto'], $rs['precoUnitario'], $rs['dataValidade'], $rs['dataConfecao'], $rs['stock'], $rs['idFornecedor'], $rs['unidadeMedida']);
     return $produto;
 }
-
 
 function pesquisarProduto($pesquisa)
 {
     global $conexao;
     $produtos = array();
     $pesquisa = mysqli_real_escape_string($conexao, $pesquisa);
-    $sql = "select * from produto where produto like '%{$pesquisa}%' or precoUnitario like '%{$pesquisa}%' or dataValidade like '%{$pesquisa}%' or dataConfecao like '%{$pesquisa}%'";
+    $sql = "select p.*, f.nomeFornecedor from produto p left join fornecedor f on f.idFornecedor = p.idFornecedor
+    where p.produto like '%{$pesquisa}%' or p.precoUnitario like '%{$pesquisa}%' or p.dataValidade like '%{$pesquisa}%' or p.dataConfecao like '%{$pesquisa}%'";
     $result = mysqli_query($conexao, $sql);
+
     if ($result) {
         while ($rs = mysqli_fetch_assoc($result)) {
-            $produto = new Produto($rs['idProduto'], $rs['produto'], $rs['precoUnitario'], $rs['dataValidade'], $rs['dataConfecao']);
+            $produto = new Produto($rs['idProduto'], $rs['produto'], $rs['precoUnitario'], $rs['dataValidade'], $rs['dataConfecao'], $rs['stock'], $rs['nomeFornecedor'], $rs['unidadeMedida']);
             array_push($produtos, $produto);
         }
     }

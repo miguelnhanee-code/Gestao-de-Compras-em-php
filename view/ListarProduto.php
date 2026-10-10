@@ -1,5 +1,6 @@
 <?php
 include_once __DIR__ . '/../controller/controllerProduto.php';
+include_once __DIR__ . '/../controller/controllerFornecedor.php';
 include_once __DIR__ . '/../model/Produto.php';
 
 include_once __DIR__ . '/../controller/controllerLogin.php';
@@ -12,10 +13,11 @@ header("Pragma: no-cache");
 $perfil = $_SESSION['perfil'];
 
 $produtos = listarProduto();
+$fornecedores = listarFornecedor();
 
 if (isset($_POST['remover'])) {
     global $conexao;
-    removerProduto($_POST['id']);
+    remocaoProduto($_POST['id']);
     header('Location: ListarProduto.php');
 }
 
@@ -30,12 +32,20 @@ if (
         $produto->setPrecoUnitario($_POST['precoUnitario']);
         $produto->setDataConfecao($_POST['dataConfeccao']);
         $produto->setDataValidade($_POST['dataValidade']);
-        actualizarProduto($produto);
+        $produto->setStock($_POST['stock']);
+        $produto->setUnidadeMedida($_POST['unidadeMedida']);
+        $produto->setIdFornecedor($_POST['idFornecedor']);
+        edicaoProduto($produto);
     }
     header('Location: ListarProduto.php#');
 }
-$pesquisa = $_GET['pesquisa'] ?? '';
-$produtos = $pesquisa !== '' ? pesquisarProduto($pesquisa) : listarProduto();
+$produtos = listarProduto();
+$pesquisa = $_POST['pesquisaCampo'] ?? '';
+if (isset($_POST['pesquisarBt'])) {
+    if (!empty($pesquisa)) {
+        $produtos = pesquisarProduto($pesquisa);
+    }
+}
 
 ?>
 
@@ -96,13 +106,13 @@ $produtos = $pesquisa !== '' ? pesquisarProduto($pesquisa) : listarProduto();
                 <div class="topo">
                     <h1 class="titulo"><strong>Lista de Produtos</strong></h1>
                 </div>
-                <form method="get">
+                <form method="post">
                     <div class="linha">
                         <div class="campo campoBusca">
-                            <input type="text" name="pesquisa" class="input" placeholder="Pesquisar " value="<?= $pesquisa ?>">
+                            <input type="text" name="pesquisaCampo" class="input" placeholder="Pesquisar " value="<?= $pesquisa ?>">
                         </div>
                         <div class="campo">
-                            <button type="submit" class="botao">Pesquisar</button>
+                            <button type="submit" name="pesquisarBt" class="botao">Pesquisar</button>
                         </div>
                     </div>
                 </form>
@@ -113,9 +123,12 @@ $produtos = $pesquisa !== '' ? pesquisarProduto($pesquisa) : listarProduto();
                             <tr>
                                 <th>ID</th>
                                 <th>Nome do Produto</th>
+                                <th>Stock</th>
+                                <th>unidade Medida</th>
                                 <th>Data Confeccao</th>
                                 <th>Data Validade</th>
                                 <th>Preco unitario</th>
+                                <th>Fornecedor</th>
                                 <th>Acao</th>
                             </tr>
                         </thead>
@@ -130,9 +143,12 @@ $produtos = $pesquisa !== '' ? pesquisarProduto($pesquisa) : listarProduto();
                                 <tr>
                                     <td><?= $produto->getIdproduto() ?></td>
                                     <td><?= $produto->getProduto() ?></td>
+                                    <td><?= $produto->getStock() ?></td>
+                                    <td><?= $produto->getUnidadeMedida() ?></td>
                                     <td><?= $produto->getDataConfecao() ?></td>
                                     <td><?= $produto->getDataValidade() ?></td>
                                     <td><?= $produto->getPrecoUnitario() ?></td>
+                                    <td><?= $produto->getIdFornecedor() ?></td>
 
                                     <td>
                                         <div class="acoes">
@@ -178,6 +194,22 @@ $produtos = $pesquisa !== '' ? pesquisarProduto($pesquisa) : listarProduto();
                                     <div class="linha">
                                         <div class="campo campoFlex">
                                             <div class="campoTipo">
+                                                <label class="label"><strong>Unidade de Medida</strong></label>
+                                            </div>
+                                            <input type="text" name="unidadeMedida" class="input" value="<?= $produto->getUnidadeMedida() ?>" required>
+                                        </div>
+
+                                        <div class="campo campoFlex">
+                                            <div class="campoTipo">
+                                                <label class="label"><strong>Stock</strong></label>
+                                            </div>
+                                            <input type="number" step="any" name="stock" class="input" value="<?= $produto->getStock() ?>" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="linha">
+                                        <div class="campo campoFlex">
+                                            <div class="campoTipo">
                                                 <label class="label"><strong>Data Confeccao</strong></label>
                                             </div>
                                             <input type="date" name="dataConfeccao" class="input" value="<?= $produto->getDataConfecao() ?>">
@@ -196,6 +228,21 @@ $produtos = $pesquisa !== '' ? pesquisarProduto($pesquisa) : listarProduto();
                                             </div>
                                             <input type="text" name="precoUnitario" class="input" value="<?= $produto->getPrecoUnitario() ?>">
                                         </div>
+                                    </div>
+
+                                    <div class="campo">
+                                        <div class="campoTipo">
+                                            <label class="label"><strong>Fornecedor</strong></label>
+                                        </div>
+                                        <select name="idFornecedor" class="input">
+                                            <option value="">Seleccione o fornecedor</option>
+                                            <?php foreach ($fornecedores as $fornecedor) { ?>
+                                                <option value="<?= $fornecedor->getIdFornecedor() ?>"
+                                                    <?= $fornecedor->getNomeFornecedor() == $produto->getIdFornecedor() ? 'selected' : '' ?>>
+                                                    <?= $fornecedor->getNomeFornecedor() ?>
+                                                </option>
+                                            <?php } ?>
+                                        </select>
                                     </div>
 
                                     <div class="acao">
@@ -230,6 +277,22 @@ $produtos = $pesquisa !== '' ? pesquisarProduto($pesquisa) : listarProduto();
                                     <div class="linha">
                                         <div class="campo campoFlex">
                                             <div class="campoTipo">
+                                                <label class="label"><strong>Unidade de Medida</strong></label>
+                                            </div>
+                                            <input type="text" name="unidadeMedida" class="input" value="<?= $produto->getUnidadeMedida() ?>" required>
+                                        </div>
+
+                                        <div class="campo campoFlex">
+                                            <div class="campoTipo">
+                                                <label class="label"><strong>Stock</strong></label>
+                                            </div>
+                                            <input type="number" step="any" name="stock" class="input" value="<?= $produto->getStock() ?>" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="linha">
+                                        <div class="campo campoFlex">
+                                            <div class="campoTipo">
                                                 <label class="label"><strong>Data Confeccao</strong></label>
                                             </div>
                                             <input type="date" name="dataConfeccao" class="input" value="<?= $produto->getDataConfecao() ?>">
@@ -248,6 +311,21 @@ $produtos = $pesquisa !== '' ? pesquisarProduto($pesquisa) : listarProduto();
                                             </div>
                                             <input type="text" name="precoUnitario" class="input" value="<?= $produto->getPrecoUnitario() ?>">
                                         </div>
+                                    </div>
+
+                                    <div class="campo">
+                                        <div class="campoTipo">
+                                            <label class="label"><strong>Fornecedor</strong></label>
+                                        </div>
+                                        <select name="idFornecedor" class="input">
+                                            <option value="">Seleccione o fornecedor</option>
+                                            <?php foreach ($fornecedores as $fornecedor) { ?>
+                                                <option value="<?= $fornecedor->getIdFornecedor() ?>"
+                                                    <?= $fornecedor->getNomeFornecedor() == $produto->getIdFornecedor() ? 'selected' : '' ?>>
+                                                    <?= $fornecedor->getNomeFornecedor() ?>
+                                                </option>
+                                            <?php } ?>
+                                        </select>
                                     </div>
 
                                     <div class="acao">
